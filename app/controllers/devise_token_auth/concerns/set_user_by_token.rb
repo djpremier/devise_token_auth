@@ -6,7 +6,7 @@ module DeviseTokenAuth::Concerns::SetUserByToken
 
   included do
     before_action :set_request_start
-    after_action :update_auth_header
+    before_action :update_auth_header
   end
 
   protected

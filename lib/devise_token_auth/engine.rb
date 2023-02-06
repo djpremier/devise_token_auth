@@ -28,6 +28,9 @@ module DeviseTokenAuth
                  :cookie_enabled,
                  :cookie_name,
                  :cookie_attributes,
+                 :body_enabled,
+                 :body_name,
+                 :body_attributes,
                  :bypass_sign_in,
                  :send_confirmation_email,
                  :require_client_password_reset_token,
@@ -55,6 +58,7 @@ module DeviseTokenAuth
   self.cookie_enabled                       = false
   self.cookie_name                          = 'auth_cookie'
   self.cookie_attributes                    = {}
+  self.body_enabled                         = false
   self.bypass_sign_in                       = true
   self.send_confirmation_email              = false
   self.require_client_password_reset_token  = false

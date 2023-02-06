@@ -101,9 +101,13 @@ module DeviseTokenAuth
     end
 
     def render_create_success
-      render json: {
-        data: resource_data(resource_json: @resource.token_validation_response)
+      response_data = {
+        data: resource_data(resource_json: @resource.token_validation_response),
       }
+
+      response_data.merge!(@resource.build_auth_header(@token.token, @token.client)) if DeviseTokenAuth.body_enabled # update the response body if configured
+
+      render json: response_data
     end
 
     def render_create_error_not_confirmed
