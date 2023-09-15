@@ -19,7 +19,7 @@ class Overrides::RegistrationsControllerTest < ActionDispatch::IntegrationTest
            params: { email: @existing_user.email,
                      password: @existing_user.password }
 
-      @resource = assigns(:resource)
+      @dta_resource = assigns(:resource)
       @data = JSON.parse(response.body)
     end
 

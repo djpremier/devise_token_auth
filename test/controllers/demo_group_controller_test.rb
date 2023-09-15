@@ -13,13 +13,13 @@ class DemoGroupControllerTest < ActionDispatch::IntegrationTest
     describe 'Token access' do
       before do
         # user
-        @resource = create(:user, :confirmed)
+        @dta_resource = create(:user, :confirmed)
 
-        @resource_auth_headers = @resource.create_new_auth_token
+        @dta_resource_auth_headers = @dta_resource.create_new_auth_token
 
-        @resource_token     = @resource_auth_headers['access-token']
-        @resource_client_id = @resource_auth_headers['client']
-        @resource_expiry    = @resource_auth_headers['expiry']
+        @dta_resource_token     = @dta_resource_auth_headers['access-token']
+        @dta_resource_client_id = @dta_resource_auth_headers['client']
+        @dta_resource_expiry    = @dta_resource_auth_headers['expiry']
 
         # mang
         @mang = create(:mang_user, :confirmed)
@@ -34,11 +34,11 @@ class DemoGroupControllerTest < ActionDispatch::IntegrationTest
       describe 'user access' do
         before do
           # ensure that request is not treated as batch request
-          age_token(@resource, @resource_client_id)
+          age_token(@dta_resource, @dta_resource_client_id)
 
           get '/demo/members_only_group',
               params: {},
-              headers: @resource_auth_headers
+              headers: @dta_resource_auth_headers
 
           @resp_token       = response.headers['access-token']
           @resp_client_id   = response.headers['client']
@@ -52,7 +52,7 @@ class DemoGroupControllerTest < ActionDispatch::IntegrationTest
 
         describe 'devise mappings' do
           it 'should define current_user' do
-            assert_equal @resource, @controller.current_user
+            assert_equal @dta_resource, @controller.current_user
           end
 
           it 'should define user_signed_in?' do
@@ -60,19 +60,19 @@ class DemoGroupControllerTest < ActionDispatch::IntegrationTest
           end
 
           it 'should not define current_mang' do
-            refute_equal @resource, @controller.current_mang
+            refute_equal @dta_resource, @controller.current_mang
           end
 
           it 'should define current_member' do
-            assert_equal @resource, @controller.current_member
+            assert_equal @dta_resource, @controller.current_member
           end
 
           it 'should define current_members' do
-            assert @controller.current_members.include? @resource
+            assert @controller.current_members.include? @dta_resource
           end
 
           it 'should define member_signed_in?' do
-            assert @controller.current_members.include? @resource
+            assert @controller.current_members.include? @dta_resource
           end
 
           it 'should define render_authenticate_error' do

@@ -18,14 +18,15 @@ module DeviseTokenAuth::Concerns::SetUserByToken
 
     # initialize instance variables
     @token ||= DeviseTokenAuth::TokenFactory.new
-    @resource ||= nil
+    @dta_resource ||= nil
     @is_batch_request ||= nil
   end
 
   # user auth
   def set_user_by_token(mapping = nil)
     # determine target authentication class
-    rc = resource_class(mapping)
+    @devise_mapping = Devise.mappings[mapping]
+    rc = resource_class()
 
     # no default user defined
     return unless rc
@@ -58,21 +59,20 @@ module DeviseTokenAuth::Concerns::SetUserByToken
 
     # client isn't required, set to 'default' if absent
     @token.client ||= 'default'
-
     # check for an existing user, authenticated via warden/devise, if enabled
     if DeviseTokenAuth.enable_standard_devise_support
       devise_warden_user = warden.user(mapping)
       if devise_warden_user && devise_warden_user.tokens[@token.client].nil?
         @used_auth_by_token = false
-        @resource = devise_warden_user
+        @dta_resource = devise_warden_user
         # REVIEW: The following line _should_ be safe to remove;
         #  the generated token does not get used anywhere.
-        # @resource.create_new_auth_token
+        # @dta_resource.create_new_auth_token
       end
     end
 
     # user has already been found and authenticated
-    return @resource if @resource && @resource.is_a?(rc)
+    return @dta_resource if @dta_resource && @dta_resource.is_a?(rc)
 
     # ensure we clear the client
     unless @token.present?
@@ -91,27 +91,27 @@ module DeviseTokenAuth::Concerns::SetUserByToken
       else
         sign_in(scope, user, store: false, event: :fetch, bypass: DeviseTokenAuth.bypass_sign_in)
       end
-      return @resource = user
+      return @dta_resource = user
     else
       # zero all values previously set values
       @token.client = nil
-      return @resource = nil
+      return @dta_resource = nil
     end
   end
 
   def update_auth_header
     # cannot save object if model has invalid params
-    return unless @resource && @token.client
+    return unless @dta_resource && @token.client
 
     # Generate new client with existing authentication
     @token.client = nil unless @used_auth_by_token
 
     if @used_auth_by_token && !DeviseTokenAuth.change_headers_on_each_request
-      # should not append auth header if @resource related token was
+      # should not append auth header if @dta_resource related token was
       # cleared by sign out in the meantime
-      return if @resource.reload.tokens[@token.client].nil?
+      return if @dta_resource.reload.tokens[@token.client].nil?
 
-      auth_header = @resource.build_auth_headers(@token.token, @token.client)
+      auth_header = @dta_resource.build_auth_headers(@token.token, @token.client)
 
       # update the response header
       response.headers.merge!(auth_header)
@@ -121,11 +121,11 @@ module DeviseTokenAuth::Concerns::SetUserByToken
         set_cookie(auth_header)
       end
     else
-      unless @resource.reload.valid?
-        @resource = @resource.class.find(@resource.to_param) # errors remain after reload
+      unless @dta_resource.reload.valid?
+        @dta_resource = @dta_resource.class.find(@dta_resource.to_param) # errors remain after reload
         # if we left the model in a bad state, something is wrong in our app
-        unless @resource.valid?
-          raise DeviseTokenAuth::Errors::InvalidModel, "Cannot set auth token in invalid model. Errors: #{@resource.errors.full_messages}"
+        unless @dta_resource.valid?
+          raise DeviseTokenAuth::Errors::InvalidModel, "Cannot set auth token in invalid model. Errors: #{@dta_resource.errors.full_messages}"
         end
       end
       refresh_headers
@@ -144,10 +144,10 @@ module DeviseTokenAuth::Concerns::SetUserByToken
   def refresh_headers
     # Lock the user record during any auth_header updates to ensure
     # we don't have write contention from multiple threads
-    @resource.with_lock do
-      # should not append auth header if @resource related token was
+    @dta_resource.with_lock do
+      # should not append auth header if @dta_resource related token was
       # cleared by sign out in the meantime
-      return if @used_auth_by_token && @resource.tokens[@token.client].nil?
+      return if @used_auth_by_token && @dta_resource.tokens[@token.client].nil?
 
       _auth_header_from_batch_request = auth_header_from_batch_request
 
@@ -175,13 +175,13 @@ module DeviseTokenAuth::Concerns::SetUserByToken
   def auth_header_from_batch_request
     # determine batch request status after request processing, in case
     # another processes has updated it during that processing
-    @is_batch_request = is_batch_request?(@resource, @token.client)
+    @is_batch_request = is_batch_request?(@dta_resource, @token.client)
 
     auth_header = {}
     # extend expiration of batch buffer to account for the duration of
     # this request
     if @is_batch_request
-      auth_header = @resource.extend_batch_buffer(@token.token, @token.client)
+      auth_header = @dta_resource.extend_batch_buffer(@token.token, @token.client)
 
       # Do not return token for batch requests to avoid invalidated
       # tokens returned to the client in case of race conditions.
@@ -192,7 +192,7 @@ module DeviseTokenAuth::Concerns::SetUserByToken
       auth_header[DeviseTokenAuth.headers_names[:"expiry"]] = ' '
     else
       # update Authorization response header with new token
-      auth_header = @resource.create_new_auth_token(@token.client)
+      auth_header = @dta_resource.create_new_auth_token(@token.client)
     end
     auth_header
   end

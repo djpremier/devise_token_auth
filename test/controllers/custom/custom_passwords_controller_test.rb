@@ -7,17 +7,17 @@ class Custom::PasswordsControllerTest < ActionController::TestCase
     include CustomControllersRoutes
 
     before do
-      @resource = create(:user, :confirmed)
+      @dta_resource = create(:user, :confirmed)
       @redirect_url = 'http://ng-token-auth.dev'
     end
 
     test 'yield resource to block on create success' do
       post :create,
-           params: { email:  @resource.email,
+           params: { email:  @dta_resource.email,
                      redirect_url: @redirect_url }
 
       @mail = ActionMailer::Base.deliveries.last
-      @resource.reload
+      @dta_resource.reload
 
       @mail_config_name  = CGI.unescape(@mail.body.match(/config=([^&]*)&/)[1])
       @mail_redirect_url = CGI.unescape(@mail.body.match(/redirect_url=([^&]*)&/)[1])
@@ -28,16 +28,16 @@ class Custom::PasswordsControllerTest < ActionController::TestCase
     end
 
     test 'yield resource to block on edit success' do
-      @resource = create(:user)
+      @dta_resource = create(:user)
       @redirect_url = 'http://ng-token-auth.dev'
 
       post :create,
-           params: { email:  @resource.email,
+           params: { email:  @dta_resource.email,
                      redirect_url: @redirect_url },
            xhr: true
 
       @mail = ActionMailer::Base.deliveries.last
-      @resource.reload
+      @dta_resource.reload
 
       @mail_config_name  = CGI.unescape(@mail.body.match(/config=([^&]*)&/)[1])
       @mail_redirect_url = CGI.unescape(@mail.body.match(/redirect_url=([^&]*)&/)[1])
@@ -47,13 +47,13 @@ class Custom::PasswordsControllerTest < ActionController::TestCase
           params: { reset_password_token: @mail_reset_token,
                     redirect_url: @mail_redirect_url },
           xhr: true
-      @resource.reload
+      @dta_resource.reload
       assert @controller.edit_block_called?,
              'edit failed to yield resource to provided block'
     end
 
     test 'yield resource to block on update success' do
-      @auth_headers = @resource.create_new_auth_token
+      @auth_headers = @dta_resource.create_new_auth_token
       request.headers.merge!(@auth_headers)
       @new_password = Faker::Internet.password
       put :update,
@@ -63,7 +63,7 @@ class Custom::PasswordsControllerTest < ActionController::TestCase
     end
 
     test 'yield resource to block on update success with custom json' do
-      @auth_headers = @resource.create_new_auth_token
+      @auth_headers = @dta_resource.create_new_auth_token
       request.headers.merge!(@auth_headers)
       @new_password = Faker::Internet.password
       put :update,

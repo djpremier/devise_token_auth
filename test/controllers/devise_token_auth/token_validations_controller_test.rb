@@ -11,16 +11,16 @@ require 'test_helper'
 class DeviseTokenAuth::TokenValidationsControllerTest < ActionDispatch::IntegrationTest
   describe DeviseTokenAuth::TokenValidationsController do
     before do
-      @resource = create(:user, :confirmed)
+      @dta_resource = create(:user, :confirmed)
 
-      @auth_headers = @resource.create_new_auth_token
+      @auth_headers = @dta_resource.create_new_auth_token
 
       @token     = @auth_headers['access-token']
       @client_id = @auth_headers['client']
       @expiry    = @auth_headers['expiry']
       @authorization_header = @auth_headers.slice('Authorization')
       # ensure that request is not treated as batch request
-      age_token(@resource, @client_id)
+      age_token(@dta_resource, @client_id)
     end
 
     describe 'using only Authorization header' do
@@ -87,8 +87,8 @@ class DeviseTokenAuth::TokenValidationsControllerTest < ActionDispatch::Integrat
 
     describe 'with invalid user' do
       before do
-        @resource.update_column(:email, 'invalid') if DEVISE_TOKEN_AUTH_ORM == :active_record
-        @resource.set(email: 'invalid') if DEVISE_TOKEN_AUTH_ORM == :mongoid
+        @dta_resource.update_column(:email, 'invalid') if DEVISE_TOKEN_AUTH_ORM == :active_record
+        @dta_resource.set(email: 'invalid') if DEVISE_TOKEN_AUTH_ORM == :mongoid
       end
 
       test 'request should raise invalid model error' do
@@ -120,16 +120,16 @@ class DeviseTokenAuth::TokenValidationsControllerTest < ActionDispatch::Integrat
 
   describe 'using namespaces with unused resource' do
     before do
-      @resource = create(:scoped_user, :confirmed)
+      @dta_resource = create(:scoped_user, :confirmed)
 
-      @auth_headers = @resource.create_new_auth_token
+      @auth_headers = @dta_resource.create_new_auth_token
 
       @token     = @auth_headers['access-token']
       @client_id = @auth_headers['client']
       @expiry    = @auth_headers['expiry']
 
       # ensure that request is not treated as batch request
-      age_token(@resource, @client_id)
+      age_token(@dta_resource, @client_id)
     end
 
     test 'should be successful' do

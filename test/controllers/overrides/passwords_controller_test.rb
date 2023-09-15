@@ -13,16 +13,16 @@ class Overrides::PasswordsControllerTest < ActionDispatch::IntegrationTest
 
   describe Overrides::PasswordsController do
     before do
-      @resource = create(:user, :confirmed)
+      @dta_resource = create(:user, :confirmed)
 
       post '/evil_user_auth/password',
            params: {
-             email: @resource.email,
+             email: @dta_resource.email,
              redirect_url: Faker::Internet.url
            }
 
       mail = ActionMailer::Base.deliveries.last
-      @resource.reload
+      @dta_resource.reload
 
       mail_reset_token  = mail.body.match(/reset_password_token=(.*)\"/)[1]
       mail_redirect_url = CGI.unescape(mail.body.match(/redirect_url=([^&]*)&/)[1])
@@ -33,7 +33,7 @@ class Overrides::PasswordsControllerTest < ActionDispatch::IntegrationTest
             redirect_url: mail_redirect_url
           }
 
-      @resource.reload
+      @dta_resource.reload
 
       _, raw_query_string = response.location.split('?')
       @query_string = Rack::Utils.parse_nested_query(raw_query_string)

@@ -10,21 +10,21 @@ module DeviseTokenAuth
       return render_create_error_missing_email unless resource_params[:email]
 
       @email = get_case_insensitive_field_from_resource_params(:email)
-      @resource = find_resource(:email, @email)
+      @dta_resource = find_resource(:email, @email)
 
-      if @resource
-        yield @resource if block_given?
+      if @dta_resource
+        yield @dta_resource if block_given?
 
-        @resource.send_unlock_instructions(
+        @dta_resource.send_unlock_instructions(
           email: @email,
           provider: 'email',
           client_config: params[:config_name]
         )
 
-        if @resource.errors.empty?
+        if @dta_resource.errors.empty?
           return render_create_success
         else
-          render_create_error @resource.errors
+          render_create_error @dta_resource.errors
         end
       else
         render_not_found_error
@@ -32,18 +32,18 @@ module DeviseTokenAuth
     end
 
     def show
-      @resource = resource_class.unlock_access_by_token(params[:unlock_token])
+      @dta_resource = resource_class.unlock_access_by_token(params[:unlock_token])
 
-      if @resource.persisted?
-        token = @resource.create_token
-        @resource.save!
-        yield @resource if block_given?
+      if @dta_resource.persisted?
+        token = @dta_resource.create_token
+        @dta_resource.save!
+        yield @dta_resource if block_given?
 
         redirect_header_options = { unlock: true }
         redirect_headers = build_redirect_headers(token.token,
                                                   token.client,
                                                   redirect_header_options)
-        redirect_to(@resource.build_auth_url(after_unlock_path_for(@resource),
+        redirect_to(@dta_resource.build_auth_url(after_unlock_path_for(@dta_resource),
                                              redirect_headers),
                                              redirect_options)
       else

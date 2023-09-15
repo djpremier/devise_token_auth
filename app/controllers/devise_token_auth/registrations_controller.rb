@@ -10,9 +10,9 @@ module DeviseTokenAuth
     def create
       build_resource
 
-      unless @resource.present?
+      unless @dta_resource.present?
         raise DeviseTokenAuth::Errors::NoResourceDefinedError,
-              "#{self.class.name} #build_resource does not define @resource,"\
+              "#{self.class.name} #build_resource does not define @dta_resource,"\
               ' execution stopped.'
       end
 
@@ -35,17 +35,17 @@ module DeviseTokenAuth
       resource_class.set_callback(callback_name, :after, :send_on_create_confirmation_instructions)
       resource_class.skip_callback(callback_name, :after, :send_on_create_confirmation_instructions)
 
-      if @resource.respond_to? :skip_confirmation_notification!
+      if @dta_resource.respond_to? :skip_confirmation_notification!
         # Fix duplicate e-mails by disabling Devise confirmation e-mail
-        @resource.skip_confirmation_notification!
+        @dta_resource.skip_confirmation_notification!
       end
 
-      if @resource.save
-        yield @resource if block_given?
+      if @dta_resource.save
+        yield @dta_resource if block_given?
 
-        unless @resource.confirmed?
+        unless @dta_resource.confirmed?
           # user will require email authentication
-          @resource.send_confirmation_instructions({
+          @dta_resource.send_confirmation_instructions({
             client_config: params[:config_name],
             redirect_url: @redirect_url
           })
@@ -53,22 +53,22 @@ module DeviseTokenAuth
 
         if active_for_authentication?
           # email auth has been bypassed, authenticate user
-          @token = @resource.create_token
-          @resource.save!
+          @token = @dta_resource.create_token
+          @dta_resource.save!
           update_auth_header
         end
 
         render_create_success
       else
-        clean_up_passwords @resource
+        clean_up_passwords @dta_resource
         render_create_error
       end
     end
 
     def update
-      if @resource
-        if @resource.send(resource_update_method, account_update_params)
-          yield @resource if block_given?
+      if @dta_resource
+        if @dta_resource.send(resource_update_method, account_update_params)
+          yield @dta_resource if block_given?
           render_update_success
         else
           render_update_error
@@ -79,9 +79,9 @@ module DeviseTokenAuth
     end
 
     def destroy
-      if @resource
-        @resource.destroy
-        yield @resource if block_given?
+      if @dta_resource
+        @dta_resource.destroy
+        yield @dta_resource if block_given?
         render_destroy_success
       else
         render_destroy_error
@@ -99,14 +99,14 @@ module DeviseTokenAuth
     protected
 
     def build_resource
-      @resource            = resource_class.new(sign_up_params)
-      @resource.provider   = provider
+      @dta_resource            = resource_class.new(sign_up_params)
+      @dta_resource.provider   = provider
 
       # honor devise configuration for case_insensitive_keys
       if resource_class.case_insensitive_keys.include?(:email)
-        @resource.email = sign_up_params[:email].try(:downcase)
+        @dta_resource.email = sign_up_params[:email].try(:downcase)
       else
-        @resource.email = sign_up_params[:email]
+        @dta_resource.email = sign_up_params[:email]
       end
     end
 
@@ -164,7 +164,7 @@ module DeviseTokenAuth
     def render_destroy_success
       render json: {
         status: 'success',
-        message: I18n.t('devise_token_auth.registrations.account_with_uid_destroyed', uid: @resource.uid)
+        message: I18n.t('devise_token_auth.registrations.account_with_uid_destroyed', uid: @dta_resource.uid)
       }
     end
 
@@ -199,7 +199,7 @@ module DeviseTokenAuth
     end
 
     def active_for_authentication?
-      !@resource.respond_to?(:active_for_authentication?) || @resource.active_for_authentication?
+      !@dta_resource.respond_to?(:active_for_authentication?) || @dta_resource.active_for_authentication?
     end
   end
 end

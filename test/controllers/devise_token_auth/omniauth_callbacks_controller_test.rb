@@ -41,12 +41,12 @@ class OmniauthTest < ActionDispatch::IntegrationTest
 
     test 'user should have been created' do
       get_success
-      assert @resource
+      assert @dta_resource
     end
 
     test 'user should be assigned info from provider' do
       get_success
-      assert_equal 'chongbong@aol.com', @resource.email
+      assert_equal 'chongbong@aol.com', @dta_resource.email
     end
 
     test 'user should be assigned token' do
@@ -57,10 +57,10 @@ class OmniauthTest < ActionDispatch::IntegrationTest
       expiry = controller.auth_params[:expiry]
 
       # the expiry should have been set
-      assert_equal expiry, @resource.tokens[client_id]['expiry'] || @resource.tokens[client_id][:expiry]
+      assert_equal expiry, @dta_resource.tokens[client_id]['expiry'] || @dta_resource.tokens[client_id][:expiry]
 
       # the token sent down to the client should now be valid
-      assert @resource.valid_token?(token, client_id)
+      assert @dta_resource.valid_token?(token, client_id)
     end
 
     test 'session vars have been cleared' do
@@ -92,7 +92,7 @@ class OmniauthTest < ActionDispatch::IntegrationTest
       end
 
       test 'user should be of the correct class' do
-        assert_equal User, @resource.class
+        assert_equal User, @dta_resource.class
       end
     end
 
@@ -107,7 +107,7 @@ class OmniauthTest < ActionDispatch::IntegrationTest
         follow_all_redirects!
 
         assert_equal 200, response.status
-        @resource = assigns(:resource)
+        @dta_resource = assigns(:resource)
       end
 
       test 'request should determine the correct resource_class' do
@@ -115,7 +115,7 @@ class OmniauthTest < ActionDispatch::IntegrationTest
       end
 
       test 'user should be of the correct class' do
-        assert_equal Mang, @resource.class
+        assert_equal Mang, @dta_resource.class
       end
     end
 
@@ -131,7 +131,7 @@ class OmniauthTest < ActionDispatch::IntegrationTest
 
         follow_all_redirects!
 
-        @resource = assigns(:resource)
+        @dta_resource = assigns(:resource)
       end
 
       test 'status shows success' do
@@ -139,11 +139,11 @@ class OmniauthTest < ActionDispatch::IntegrationTest
       end
 
       test 'additional attribute was passed' do
-        assert_equal @fav_color, @resource.favorite_color
+        assert_equal @fav_color, @dta_resource.favorite_color
       end
 
       test 'non-whitelisted attributes are ignored' do
-        refute_equal @unpermitted_param, @resource.name
+        refute_equal @unpermitted_param, @dta_resource.name
       end
     end
 
@@ -195,7 +195,7 @@ class OmniauthTest < ActionDispatch::IntegrationTest
 
         follow_all_redirects!
 
-        @resource = assigns(:resource)
+        @dta_resource = assigns(:resource)
       end
 
       test 'request is successful' do
@@ -203,11 +203,11 @@ class OmniauthTest < ActionDispatch::IntegrationTest
       end
 
       test 'user should have been created' do
-        assert @resource
+        assert @dta_resource
       end
 
       test 'user should be of the correct class' do
-        assert_equal User, @resource.class
+        assert_equal User, @dta_resource.class
       end
     end
 
@@ -227,7 +227,7 @@ class OmniauthTest < ActionDispatch::IntegrationTest
 
     def assert_expected_data_in_new_window
       data = get_parsed_data_json
-      expected_data = @resource.as_json.merge(controller.auth_params.as_json)
+      expected_data = @dta_resource.as_json.merge(controller.auth_params.as_json)
       expected_data = ActiveSupport::JSON.decode(expected_data.to_json)
       assert_equal(expected_data.merge('message' => 'deliverCredentials'), data)
     end
@@ -247,7 +247,7 @@ class OmniauthTest < ActionDispatch::IntegrationTest
 
         # Assert that a uid was passed along.  We have to assume
         # that the rest of the values were as well, as we don't
-        # have access to @resource in this test anymore
+        # have access to @dta_resource in this test anymore
         assert(controller.params['uid'], 'No uid found')
 
         # check that all the auth stuff is there
@@ -268,7 +268,7 @@ class OmniauthTest < ActionDispatch::IntegrationTest
 
       assert_equal 200, response.status
 
-      @resource = assigns(:resource)
+      @dta_resource = assigns(:resource)
     end
   end
 

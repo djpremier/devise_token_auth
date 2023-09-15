@@ -3,11 +3,11 @@
 module Overrides
   class ConfirmationsController < DeviseTokenAuth::ConfirmationsController
     def show
-      @resource = resource_class.confirm_by_token(params[:confirmation_token])
+      @dta_resource = resource_class.confirm_by_token(params[:confirmation_token])
 
-      if @resource && @resource.id
-        token = @resource.create_token
-        @resource.save!
+      if @dta_resource && @dta_resource.id
+        token = @dta_resource.create_token
+        @dta_resource.save!
 
         redirect_header_options = {
           account_confirmation_success: true,
@@ -18,7 +18,7 @@ module Overrides
                                                   token.client,
                                                   redirect_header_options)
 
-        redirect_to(@resource.build_auth_url(params[:redirect_url],
+        redirect_to(@dta_resource.build_auth_url(params[:redirect_url],
                                              redirect_headers),
                                              redirect_options)
       else

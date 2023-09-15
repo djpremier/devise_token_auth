@@ -5,22 +5,22 @@ module Overrides
     OVERRIDE_PROOF = '(^^,)'.freeze
 
     def create
-      @resource = resource_class.dta_find_by(email: resource_params[:email])
+      @dta_resource = resource_class.dta_find_by(email: resource_params[:email])
 
-      if @resource && valid_params?(:email, resource_params[:email]) && @resource.valid_password?(resource_params[:password]) && @resource.confirmed?
-        @token = @resource.create_token
-        @resource.save
+      if @dta_resource && valid_params?(:email, resource_params[:email]) && @dta_resource.valid_password?(resource_params[:password]) && @dta_resource.confirmed?
+        @token = @dta_resource.create_token
+        @dta_resource.save
 
         render json: {
-          data: @resource.as_json(except: %i[tokens created_at updated_at]),
+          data: @dta_resource.as_json(except: %i[tokens created_at updated_at]),
           override_proof: OVERRIDE_PROOF
         }
 
-      elsif @resource && (not @resource.confirmed?)
+      elsif @dta_resource && (not @dta_resource.confirmed?)
         render json: {
           success: false,
           errors: [
-            "A confirmation email was sent to your account at #{@resource.email}. "\
+            "A confirmation email was sent to your account at #{@dta_resource.email}. "\
             'You must follow the instructions in the email before your account '\
             'can be activated'
           ]

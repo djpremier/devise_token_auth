@@ -14,24 +14,24 @@ module DeviseTokenAuth
       if field = (resource_params.keys.map(&:to_sym) & resource_class.authentication_keys).first
         q_value = get_case_insensitive_field_from_resource_params(field)
 
-        @resource = find_resource(field, q_value)
+        @dta_resource = find_resource(field, q_value)
       end
 
-      if @resource && valid_params?(field, q_value) && (!@resource.respond_to?(:active_for_authentication?) || @resource.active_for_authentication?)
-        valid_password = @resource.valid_password?(resource_params[:password])
-        if (@resource.respond_to?(:valid_for_authentication?) && !@resource.valid_for_authentication? { valid_password }) || !valid_password
+      if @dta_resource && valid_params?(field, q_value) && (!@dta_resource.respond_to?(:active_for_authentication?) || @dta_resource.active_for_authentication?)
+        valid_password = @dta_resource.valid_password?(resource_params[:password])
+        if (@dta_resource.respond_to?(:valid_for_authentication?) && !@dta_resource.valid_for_authentication? { valid_password }) || !valid_password
           return render_create_error_bad_credentials
         end
 
         create_and_assign_token
 
-        sign_in(@resource, scope: :user, store: false, bypass: false)
+        sign_in(@dta_resource, scope: :user, store: false, bypass: false)
 
-        yield @resource if block_given?
+        yield @dta_resource if block_given?
 
         render_create_success
-      elsif @resource && !Devise.paranoid && !(!@resource.respond_to?(:active_for_authentication?) || @resource.active_for_authentication?)
-        if @resource.respond_to?(:locked_at) && @resource.locked_at
+      elsif @dta_resource && !Devise.paranoid && !(!@dta_resource.respond_to?(:active_for_authentication?) || @dta_resource.active_for_authentication?)
+        if @dta_resource.respond_to?(:locked_at) && @dta_resource.locked_at
           render_create_error_account_locked
         else
           render_create_error_not_confirmed
@@ -44,7 +44,7 @@ module DeviseTokenAuth
 
     def destroy
       # remove auth instance variables so that after_action does not run
-      user = remove_instance_variable(:@resource) if @resource
+      user = remove_instance_variable(:@dta_resource) if @dta_resource
       client = @token.client
       @token.clear!
 
@@ -98,12 +98,12 @@ module DeviseTokenAuth
 
     def render_create_success
       render json: {
-        data: resource_data(resource_json: @resource.token_validation_response)
+        data: resource_data(resource_json: @dta_resource.token_validation_response)
       }
     end
 
     def render_create_error_not_confirmed
-      render_error(401, I18n.t('devise_token_auth.sessions.not_confirmed', email: @resource.email))
+      render_error(401, I18n.t('devise_token_auth.sessions.not_confirmed', email: @dta_resource.email))
     end
 
     def render_create_error_account_locked
@@ -131,14 +131,14 @@ module DeviseTokenAuth
     end
 
     def create_and_assign_token
-      if @resource.respond_to?(:with_lock)
-        @resource.with_lock do
-          @token = @resource.create_token
-          @resource.save!
+      if @dta_resource.respond_to?(:with_lock)
+        @dta_resource.with_lock do
+          @token = @dta_resource.create_token
+          @dta_resource.save!
         end
       else
-        @token = @resource.create_token
-        @resource.save!
+        @token = @dta_resource.create_token
+        @dta_resource.save!
       end
     end
 

@@ -12,9 +12,9 @@ class DemoMangControllerTest < ActionDispatch::IntegrationTest
   describe DemoMangController do
     describe 'Token access' do
       before do
-        @resource = create(:mang_user, :confirmed)
+        @dta_resource = create(:mang_user, :confirmed)
 
-        @auth_headers = @resource.create_new_auth_token
+        @auth_headers = @dta_resource.create_new_auth_token
 
         @token     = @auth_headers['access-token']
         @client_id = @auth_headers['client']
@@ -24,7 +24,7 @@ class DemoMangControllerTest < ActionDispatch::IntegrationTest
       describe 'successful request' do
         before do
           # ensure that request is not treated as batch request
-          age_token(@resource, @client_id)
+          age_token(@dta_resource, @client_id)
 
           get '/demo/members_only_mang',
               params: {},
@@ -38,7 +38,7 @@ class DemoMangControllerTest < ActionDispatch::IntegrationTest
 
         describe 'devise mappings' do
           it 'should define current_mang' do
-            assert_equal @resource, @controller.current_mang
+            assert_equal @dta_resource, @controller.current_mang
           end
 
           it 'should define mang_signed_in?' do
@@ -46,7 +46,7 @@ class DemoMangControllerTest < ActionDispatch::IntegrationTest
           end
 
           it 'should not define current_user' do
-            refute_equal @resource, @controller.current_user
+            refute_equal @dta_resource, @controller.current_user
           end
 
           it 'should define render_authenticate_error' do
@@ -67,7 +67,7 @@ class DemoMangControllerTest < ActionDispatch::IntegrationTest
         end
 
         it "should return the user's uid in the auth header" do
-          assert_equal @resource.uid, @resp_uid
+          assert_equal @dta_resource.uid, @resp_uid
         end
 
         it 'should not treat this request as a batch request' do
@@ -76,9 +76,9 @@ class DemoMangControllerTest < ActionDispatch::IntegrationTest
 
         describe 'subsequent requests' do
           before do
-            @resource.reload
+            @dta_resource.reload
             # ensure that request is not treated as batch request
-            age_token(@resource, @client_id)
+            age_token(@dta_resource, @client_id)
 
             get '/demo/members_only_mang',
                 params: {},
@@ -114,8 +114,8 @@ class DemoMangControllerTest < ActionDispatch::IntegrationTest
       describe 'disable change_headers_on_each_request' do
         before do
           DeviseTokenAuth.change_headers_on_each_request = false
-          @resource.reload
-          age_token(@resource, @client_id)
+          @dta_resource.reload
+          age_token(@dta_resource, @client_id)
 
           get '/demo/members_only_mang',
               params: {},
@@ -126,8 +126,8 @@ class DemoMangControllerTest < ActionDispatch::IntegrationTest
           @first_access_token = response.headers['access-token']
           @first_response_status = response.status
 
-          @resource.reload
-          age_token(@resource, @client_id)
+          @dta_resource.reload
+          age_token(@dta_resource, @client_id)
 
           # use expired auth header
           get '/demo/members_only_mang',
@@ -177,7 +177,7 @@ class DemoMangControllerTest < ActionDispatch::IntegrationTest
       describe 'batch requests' do
         describe 'success' do
           before do
-            age_token(@resource, @client_id)
+            age_token(@dta_resource, @client_id)
             # request.headers.merge!(@auth_headers)
 
             get '/demo/members_only_mang',
@@ -220,8 +220,8 @@ class DemoMangControllerTest < ActionDispatch::IntegrationTest
 
         describe 'time out' do
           before do
-            @resource.reload
-            age_token(@resource, @client_id)
+            @dta_resource.reload
+            age_token(@dta_resource, @client_id)
 
             get '/demo/members_only_mang',
                 params: {},
@@ -232,8 +232,8 @@ class DemoMangControllerTest < ActionDispatch::IntegrationTest
             @first_access_token = response.headers['access-token']
             @first_response_status = response.status
 
-            @resource.reload
-            age_token(@resource, @client_id)
+            @dta_resource.reload
+            age_token(@dta_resource, @client_id)
 
             # use previous auth header
             get '/demo/members_only_mang',
@@ -245,8 +245,8 @@ class DemoMangControllerTest < ActionDispatch::IntegrationTest
             @second_access_token = response.headers['access-token']
             @second_response_status = response.status
 
-            @resource.reload
-            age_token(@resource, @client_id)
+            @dta_resource.reload
+            age_token(@dta_resource, @client_id)
 
             # use expired auth headers
             get '/demo/members_only_mang',

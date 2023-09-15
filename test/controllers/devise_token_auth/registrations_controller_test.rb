@@ -26,7 +26,7 @@ class DeviseTokenAuth::RegistrationsControllerTest < ActionDispatch::Integration
         # need to post empty data
         post '/auth', params: {}
 
-        @resource = assigns(:resource)
+        @dta_resource = assigns(:resource)
         @data = JSON.parse(response.body)
       end
 
@@ -43,7 +43,7 @@ class DeviseTokenAuth::RegistrationsControllerTest < ActionDispatch::Integration
       end
 
       test 'user should not have been saved' do
-        assert @resource.nil?
+        assert @dta_resource.nil?
       end
     end
 
@@ -54,7 +54,7 @@ class DeviseTokenAuth::RegistrationsControllerTest < ActionDispatch::Integration
         post '/auth',
              params: mock_registration_params
 
-        @resource = assigns(:resource)
+        @dta_resource = assigns(:resource)
         @data = JSON.parse(response.body)
         @mail = ActionMailer::Base.deliveries.last
       end
@@ -64,11 +64,11 @@ class DeviseTokenAuth::RegistrationsControllerTest < ActionDispatch::Integration
       end
 
       test 'user should have been created' do
-        assert @resource.id
+        assert @dta_resource.id
       end
 
       test 'user should not be confirmed' do
-        assert_nil @resource.confirmed_at
+        assert_nil @dta_resource.confirmed_at
       end
 
       test 'new user data should be returned as json' do
@@ -76,7 +76,7 @@ class DeviseTokenAuth::RegistrationsControllerTest < ActionDispatch::Integration
       end
 
       test 'new user should receive confirmation email' do
-        assert_equal @resource.email, @mail['to'].to_s
+        assert_equal @dta_resource.email, @mail['to'].to_s
       end
 
       test 'new user password should not be returned' do
@@ -133,9 +133,9 @@ class DeviseTokenAuth::RegistrationsControllerTest < ActionDispatch::Integration
                        password_confirmation: 'secret123',
                        confirm_success_url: Faker::Internet.url }
 
-        @resource = assigns(:resource)
+        @dta_resource = assigns(:resource)
 
-        assert_equal @plus_email, @resource.email
+        assert_equal @plus_email, @dta_resource.email
       end
     end
 
@@ -216,7 +216,7 @@ class DeviseTokenAuth::RegistrationsControllerTest < ActionDispatch::Integration
                                   unpermitted_param: '(x_x)' }
         end
 
-        @resource = assigns(:resource)
+        @dta_resource = assigns(:resource)
         @data = JSON.parse(response.body)
         @mail = ActionMailer::Base.deliveries.last
         @sent_redirect_url = CGI.unescape(@mail.body.match(/redirect_url=([^&]*)(&|\")/)[1])
@@ -247,7 +247,7 @@ class DeviseTokenAuth::RegistrationsControllerTest < ActionDispatch::Integration
           unpermitted_param: '(x_x)'
         }
 
-        @resource = assigns(:resource)
+        @dta_resource = assigns(:resource)
         @data = JSON.parse(response.body)
         @mail = ActionMailer::Base.deliveries.last
       end
@@ -257,13 +257,13 @@ class DeviseTokenAuth::RegistrationsControllerTest < ActionDispatch::Integration
       end
 
       test 'user should have been created' do
-        assert @resource.id
+        assert @dta_resource.id
       end
     end
 
     describe 'case-insensitive email' do
       before do
-        @resource_class = User
+        @dta_resource_class = User
         @request_params = {
           email: 'AlternatingCase@example.com',
           password: 'secret123',
@@ -273,7 +273,7 @@ class DeviseTokenAuth::RegistrationsControllerTest < ActionDispatch::Integration
       end
 
       test 'success should downcase uid if configured' do
-        @resource_class.case_insensitive_keys = [:email]
+        @dta_resource_class.case_insensitive_keys = [:email]
         post '/auth', params: @request_params
         assert_equal 200, response.status
         @data = JSON.parse(response.body)
@@ -281,7 +281,7 @@ class DeviseTokenAuth::RegistrationsControllerTest < ActionDispatch::Integration
       end
 
       test 'request should not downcase uid if not configured' do
-        @resource_class.case_insensitive_keys = []
+        @dta_resource_class.case_insensitive_keys = []
         post '/auth', params: @request_params
         assert_equal 200, response.status
         @data = JSON.parse(response.body)
@@ -302,7 +302,7 @@ class DeviseTokenAuth::RegistrationsControllerTest < ActionDispatch::Integration
                        favorite_color: @fav_color,
                        operating_thetan: @operating_thetan }
 
-        @resource = assigns(:resource)
+        @dta_resource = assigns(:resource)
         @data = JSON.parse(response.body)
         @mail = ActionMailer::Base.deliveries.last
 
@@ -316,7 +316,7 @@ class DeviseTokenAuth::RegistrationsControllerTest < ActionDispatch::Integration
       end
 
       test 'additional sign_up params should be considered' do
-        assert_equal @operating_thetan, @resource.operating_thetan
+        assert_equal @operating_thetan, @dta_resource.operating_thetan
       end
 
       test 'config_name param is included in the confirmation email link' do
@@ -336,7 +336,7 @@ class DeviseTokenAuth::RegistrationsControllerTest < ActionDispatch::Integration
                        password_confirmation: 'secret123',
                        confirm_success_url: Faker::Internet.url }
 
-        @resource = assigns(:resource)
+        @dta_resource = assigns(:resource)
         @data = JSON.parse(response.body)
       end
 
@@ -345,7 +345,7 @@ class DeviseTokenAuth::RegistrationsControllerTest < ActionDispatch::Integration
       end
 
       test 'user should not have been created' do
-        refute @resource.persisted?
+        refute @dta_resource.persisted?
       end
 
       test 'error should be returned in the response' do
@@ -364,7 +364,7 @@ class DeviseTokenAuth::RegistrationsControllerTest < ActionDispatch::Integration
                        password_confirmation: 'secret123',
                        confirm_success_url: Faker::Internet.url }
 
-        @resource = assigns(:resource)
+        @dta_resource = assigns(:resource)
         @data = JSON.parse(response.body)
       end
 
@@ -373,7 +373,7 @@ class DeviseTokenAuth::RegistrationsControllerTest < ActionDispatch::Integration
       end
 
       test 'user should not have been created' do
-        refute @resource.persisted?
+        refute @dta_resource.persisted?
       end
 
       test 'error should be returned in the response' do
@@ -393,7 +393,7 @@ class DeviseTokenAuth::RegistrationsControllerTest < ActionDispatch::Integration
                        password_confirmation: 'bogus',
                        confirm_success_url: Faker::Internet.url }
 
-        @resource = assigns(:resource)
+        @dta_resource = assigns(:resource)
         @data = JSON.parse(response.body)
       end
 
@@ -402,7 +402,7 @@ class DeviseTokenAuth::RegistrationsControllerTest < ActionDispatch::Integration
       end
 
       test 'user should have been created' do
-        refute @resource.persisted?
+        refute @dta_resource.persisted?
       end
 
       test 'error should be returned in the response' do
@@ -424,7 +424,7 @@ class DeviseTokenAuth::RegistrationsControllerTest < ActionDispatch::Integration
                        password_confirmation: 'secret123',
                        confirm_success_url: Faker::Internet.url }
 
-        @resource = assigns(:resource)
+        @dta_resource = assigns(:resource)
         @data = JSON.parse(response.body)
       end
 
@@ -433,7 +433,7 @@ class DeviseTokenAuth::RegistrationsControllerTest < ActionDispatch::Integration
       end
 
       test 'user should have been created' do
-        refute @resource.persisted?
+        refute @dta_resource.persisted?
       end
 
       test 'error should be returned in the response' do
@@ -503,7 +503,7 @@ class DeviseTokenAuth::RegistrationsControllerTest < ActionDispatch::Integration
           describe 'success' do
             before do
               # test valid update param
-              @resource_class = User
+              @dta_resource_class = User
               @new_operating_thetan = 1_000_000
               @email = Faker::Internet.safe_email
               @request_params = {
@@ -518,7 +518,7 @@ class DeviseTokenAuth::RegistrationsControllerTest < ActionDispatch::Integration
             end
 
             test 'Case sensitive attributes update' do
-              @resource_class.case_insensitive_keys = []
+              @dta_resource_class.case_insensitive_keys = []
               put '/auth', params: @request_params, headers: @auth_headers
               @data = JSON.parse(response.body)
               @existing_user.reload
@@ -529,7 +529,7 @@ class DeviseTokenAuth::RegistrationsControllerTest < ActionDispatch::Integration
             end
 
             test 'Case insensitive attributes update' do
-              @resource_class.case_insensitive_keys = [:email]
+              @dta_resource_class.case_insensitive_keys = [:email]
               put '/auth', params: @request_params, headers: @auth_headers
               @data = JSON.parse(response.body)
               @existing_user.reload
@@ -610,7 +610,7 @@ class DeviseTokenAuth::RegistrationsControllerTest < ActionDispatch::Integration
           describe 'success without password update' do
             before do
               # test valid update param
-              @resource_class = User
+              @dta_resource_class = User
               @new_operating_thetan = 1_000_000
               @email = Faker::Internet.safe_email
               @request_params = {
@@ -753,7 +753,7 @@ class DeviseTokenAuth::RegistrationsControllerTest < ActionDispatch::Integration
                        password_confirmation: 'secret123',
                        confirm_success_url: Faker::Internet.url }
 
-        @resource = assigns(:resource)
+        @dta_resource = assigns(:resource)
         @data = JSON.parse(response.body)
       end
 
@@ -762,7 +762,7 @@ class DeviseTokenAuth::RegistrationsControllerTest < ActionDispatch::Integration
       end
 
       test 'user should have been created' do
-        assert @resource.id
+        assert @dta_resource.id
       end
 
       test 'new user data should be returned as json' do
@@ -778,7 +778,7 @@ class DeviseTokenAuth::RegistrationsControllerTest < ActionDispatch::Integration
                        password_confirmation: 'secret123',
                        confirm_success_url: Faker::Internet.url }
 
-        @resource = assigns(:resource)
+        @dta_resource = assigns(:resource)
         @data = JSON.parse(response.body)
         @mail = ActionMailer::Base.deliveries.last
       end
@@ -788,24 +788,24 @@ class DeviseTokenAuth::RegistrationsControllerTest < ActionDispatch::Integration
       end
 
       test 'use should be a Mang' do
-        assert_equal 'Mang', @resource.class.name
+        assert_equal 'Mang', @dta_resource.class.name
       end
 
       test 'Mang should be destroyed' do
-        @resource.skip_confirmation!
-        @resource.save!
-        @auth_headers  = @resource.create_new_auth_token
+        @dta_resource.skip_confirmation!
+        @dta_resource.save!
+        @auth_headers  = @dta_resource.create_new_auth_token
         @client_id     = @auth_headers['client']
 
         # ensure request is not treated as batch request
-        age_token(@resource, @client_id)
+        age_token(@dta_resource, @client_id)
 
         delete '/mangs',
                params: {},
                headers: @auth_headers
 
         assert_equal 200, response.status
-        refute Mang.where(id: @resource.id).first
+        refute Mang.where(id: @dta_resource.id).first
       end
     end
 
@@ -820,11 +820,11 @@ class DeviseTokenAuth::RegistrationsControllerTest < ActionDispatch::Integration
                        confirm_success_url: Faker::Internet.url,
                        config_name: @config_name }
 
-        @resource = assigns(:resource)
+        @dta_resource = assigns(:resource)
         @data = JSON.parse(response.body)
         @mail = ActionMailer::Base.deliveries.last
 
-        @resource.reload
+        @dta_resource.reload
 
         @mail_reset_token  = @mail.body.match(/confirmation_token=([^&]*)[&"]/)[1]
         @mail_redirect_url = CGI.unescape(@mail.body.match(/redirect_url=(.*)\"/)[1])
@@ -858,7 +858,7 @@ class DeviseTokenAuth::RegistrationsControllerTest < ActionDispatch::Integration
                        password_confirmation: 'secret123',
                        confirm_success_url: Faker::Internet.url }
 
-        @resource  = assigns(:resource)
+        @dta_resource  = assigns(:resource)
         @token     = response.headers['access-token']
         @client_id = response.headers['client']
       end
@@ -868,11 +868,11 @@ class DeviseTokenAuth::RegistrationsControllerTest < ActionDispatch::Integration
       end
 
       test 'user was created' do
-        assert @resource
+        assert @dta_resource
       end
 
       test 'user was confirmed' do
-        assert @resource.confirmed?
+        assert @dta_resource.confirmed?
       end
 
       test 'auth headers were returned in response' do
@@ -884,7 +884,7 @@ class DeviseTokenAuth::RegistrationsControllerTest < ActionDispatch::Integration
       end
 
       test 'response token is valid' do
-        assert @resource.valid_token?(@token, @client_id)
+        assert @dta_resource.valid_token?(@token, @client_id)
       end
     end
 
@@ -899,13 +899,13 @@ class DeviseTokenAuth::RegistrationsControllerTest < ActionDispatch::Integration
                        confirm_success_url: Faker::Internet.url,
                        unpermitted_param: '(x_x)' }
 
-        @resource = assigns(:resource)
+        @dta_resource = assigns(:resource)
         @data = JSON.parse(response.body)
         @mail = ActionMailer::Base.deliveries.last
       end
 
       test 'user was created' do
-        assert @resource.id
+        assert @dta_resource.id
       end
 
       test 'email confirmation was not sent' do
@@ -913,7 +913,7 @@ class DeviseTokenAuth::RegistrationsControllerTest < ActionDispatch::Integration
       end
 
       test 'user is confirmed' do
-        assert @resource.confirmed?
+        assert @dta_resource.confirmed?
       end
     end
   end

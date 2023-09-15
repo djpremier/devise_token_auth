@@ -46,15 +46,15 @@ class DeviseTokenAuth::ConfirmationsControllerTest < ActionController::TestCase
                 params: { confirmation_token: @token,
                           redirect_url: @redirect_url },
                 xhr: true
-            @resource = assigns(:resource)
+            @dta_resource = assigns(:resource)
           end
 
           test 'user should now be confirmed' do
-            assert @resource.confirmed?
+            assert @dta_resource.confirmed?
           end
 
           test 'should save the authentication token' do
-            assert @resource.reload.tokens.present?
+            assert @dta_resource.reload.tokens.present?
           end
 
           test 'should redirect to success url' do
@@ -74,11 +74,11 @@ class DeviseTokenAuth::ConfirmationsControllerTest < ActionController::TestCase
                 params: { confirmation_token: @token,
                           redirect_url: @redirect_url },
                 xhr: true
-            @resource = assigns(:resource)
+            @dta_resource = assigns(:resource)
           end
 
           test 'user should now be confirmed' do
-            assert @resource.confirmed?
+            assert @dta_resource.confirmed?
           end
 
           test 'should redirect to success url' do
@@ -100,14 +100,14 @@ class DeviseTokenAuth::ConfirmationsControllerTest < ActionController::TestCase
                      params: { email: @new_user.email,
                                redirect_url: @redirect_url },
                      xhr: true
-                @resource = assigns(:resource)
+                @dta_resource = assigns(:resource)
                 @data = JSON.parse(response.body)
                 @mail = ActionMailer::Base.deliveries.last
                 @token, @client_config = token_and_client_config_from(@mail.body)
               end
 
               test 'user should not be confirmed' do
-                assert_nil @resource.confirmed_at
+                assert_nil @dta_resource.confirmed_at
               end
 
               test 'should generate raw token' do
@@ -116,11 +116,11 @@ class DeviseTokenAuth::ConfirmationsControllerTest < ActionController::TestCase
               end
 
               test 'user should receive confirmation email' do
-                assert_equal @resource.email, @mail['to'].to_s
+                assert_equal @dta_resource.email, @mail['to'].to_s
               end
 
               test 'response should contain message' do
-                assert_equal @data['message'], I18n.t('devise_token_auth.confirmations.sended', email: @resource.email)
+                assert_equal @data['message'], I18n.t('devise_token_auth.confirmations.sended', email: @dta_resource.email)
               end
             end
 
@@ -148,7 +148,7 @@ class DeviseTokenAuth::ConfirmationsControllerTest < ActionController::TestCase
                      params: { email: @new_user.email,
                                redirect_url: @redirect_url },
                      xhr: true
-                @resource = assigns(:resource)
+                @dta_resource = assigns(:resource)
                 @data = JSON.parse(response.body)
                 @mail = ActionMailer::Base.deliveries.last
                 @token, @client_config = token_and_client_config_from(@mail.body)
@@ -156,7 +156,7 @@ class DeviseTokenAuth::ConfirmationsControllerTest < ActionController::TestCase
             end
 
             test 'user should not be confirmed' do
-              assert_nil @resource.confirmed_at
+              assert_nil @dta_resource.confirmed_at
             end
 
             test 'should generate raw token' do
@@ -165,11 +165,11 @@ class DeviseTokenAuth::ConfirmationsControllerTest < ActionController::TestCase
             end
 
             test 'user should receive confirmation email' do
-              assert_equal @resource.email, @mail['to'].to_s
+              assert_equal @dta_resource.email, @mail['to'].to_s
             end
 
             test 'response should contain message' do
-              assert_equal @data['message'], I18n.t('devise_token_auth.confirmations.sended_paranoid', email: @resource.email)
+              assert_equal @data['message'], I18n.t('devise_token_auth.confirmations.sended_paranoid', email: @dta_resource.email)
             end
 
             test 'response should return success status' do
@@ -208,8 +208,8 @@ class DeviseTokenAuth::ConfirmationsControllerTest < ActionController::TestCase
 
           assert_redirected_to(/^#{@redirect_url}/)
 
-          @resource = assigns(:resource)
-          refute @resource.confirmed?
+          @dta_resource = assigns(:resource)
+          refute @dta_resource.confirmed?
         end
 
         test 'request resend confirmation without email' do
@@ -263,11 +263,11 @@ class DeviseTokenAuth::ConfirmationsControllerTest < ActionController::TestCase
           @redirect_url = Faker::Internet.url
           get :show, params: { confirmation_token: @token,
                                redirect_url: @redirect_url }
-          @resource = assigns(:resource)
+          @dta_resource = assigns(:resource)
         end
 
         test 'user should now be confirmed' do
-          assert @resource.confirmed?
+          assert @dta_resource.confirmed?
         end
       end
     end

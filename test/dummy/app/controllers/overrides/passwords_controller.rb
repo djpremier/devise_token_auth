@@ -6,17 +6,17 @@ module Overrides
 
     # this is where users arrive after visiting the email confirmation link
     def edit
-      @resource = resource_class.reset_password_by_token(
+      @dta_resource = resource_class.reset_password_by_token(
         reset_password_token: resource_params[:reset_password_token]
       )
 
-      if @resource && @resource.id
-        token = @resource.create_token
+      if @dta_resource && @dta_resource.id
+        token = @dta_resource.create_token
 
         # ensure that user is confirmed
-        @resource.skip_confirmation! unless @resource.confirmed_at
+        @dta_resource.skip_confirmation! unless @dta_resource.confirmed_at
 
-        @resource.save!
+        @dta_resource.save!
 
         redirect_header_options = {
           override_proof: OVERRIDE_PROOF,
@@ -25,7 +25,7 @@ module Overrides
         redirect_headers = build_redirect_headers(token.token,
                                                   token.client,
                                                   redirect_header_options)
-        redirect_to(@resource.build_auth_url(params[:redirect_url],
+        redirect_to(@dta_resource.build_auth_url(params[:redirect_url],
                                              redirect_headers),
                                              redirect_options)
       else

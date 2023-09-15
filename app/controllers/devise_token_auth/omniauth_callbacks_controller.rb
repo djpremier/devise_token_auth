@@ -61,20 +61,20 @@ module DeviseTokenAuth
 
       if confirmable_enabled?
         # don't send confirmation email!!!
-        @resource.skip_confirmation!
+        @dta_resource.skip_confirmation!
       end
 
-      sign_in(:user, @resource, store: false, bypass: false)
+      sign_in(:user, @dta_resource, store: false, bypass: false)
 
-      @resource.save!
+      @dta_resource.save!
 
-      yield @resource if block_given?
+      yield @dta_resource if block_given?
 
       if DeviseTokenAuth.cookie_enabled
-        set_token_in_cookie(@resource, @token)
+        set_token_in_cookie(@dta_resource, @token)
       end
 
-      render_data_or_redirect('deliverCredentials', @auth_params.as_json, @resource.as_json)
+      render_data_or_redirect('deliverCredentials', @auth_params.as_json, @dta_resource.as_json)
     end
 
     def omniauth_failure
@@ -132,13 +132,13 @@ module DeviseTokenAuth
     end
 
     def resource_class(mapping = nil)
-      return @resource_class if defined?(@resource_class)
+      return @dta_resource_class if defined?(@dta_resource_class)
 
       constant_name = omniauth_params['resource_class'].presence || params['resource_class'].presence
-      @resource_class = ObjectSpace.each_object(Class).detect { |cls| cls.to_s == constant_name && cls.pretty_print_inspect.starts_with?(constant_name) }
-      raise 'No resource_class found' if @resource_class.nil?
+      @dta_resource_class = ObjectSpace.each_object(Class).detect { |cls| cls.to_s == constant_name && cls.pretty_print_inspect.starts_with?(constant_name) }
+      raise 'No resource_class found' if @dta_resource_class.nil?
 
-      @resource_class
+      @dta_resource_class
     end
 
     def resource_name
@@ -180,15 +180,15 @@ module DeviseTokenAuth
       # set crazy password for new oauth users. this is only used to prevent
       # access via email sign-in.
       p = SecureRandom.urlsafe_base64(nil, false)
-      @resource.password = p
-      @resource.password_confirmation = p
+      @dta_resource.password = p
+      @dta_resource.password_confirmation = p
     end
 
     def create_auth_params
       @auth_params = {
         auth_token: @token.token,
         client_id:  @token.client,
-        uid:        @resource.uid,
+        uid:        @dta_resource.uid,
         expiry:     @token.expiry,
         config:     @config
       }
@@ -198,7 +198,7 @@ module DeviseTokenAuth
 
     def set_token_on_resource
       @config = omniauth_params['config_name']
-      @token  = @resource.create_token
+      @token  = @dta_resource.create_token
     end
 
     def render_error_not_allowed_auth_origin_url
@@ -260,25 +260,25 @@ module DeviseTokenAuth
 
     def get_resource_from_auth_hash
       # find or create user by provider and provider uid
-      @resource = resource_class.where(
+      @dta_resource = resource_class.where(
         uid: auth_hash['uid'],
         provider: auth_hash['provider']
       ).first_or_initialize
 
-      if @resource.new_record?
+      if @dta_resource.new_record?
         handle_new_resource
       end
 
       # sync user info with provider, update/generate auth token
-      assign_provider_attrs(@resource, auth_hash)
+      assign_provider_attrs(@dta_resource, auth_hash)
 
       # assign any additional (whitelisted) attributes
       if assign_whitelisted_params?
         extra_params = whitelisted_params
-        @resource.assign_attributes(extra_params) if extra_params
+        @dta_resource.assign_attributes(extra_params) if extra_params
       end
 
-      @resource
+      @dta_resource
     end
   end
 end

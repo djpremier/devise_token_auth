@@ -34,7 +34,7 @@ class Overrides::OmniauthCallbacksControllerTest < ActionDispatch::IntegrationTe
 
       follow_all_redirects!
 
-      @resource = assigns(:resource)
+      @dta_resource = assigns(:resource)
     end
 
     test 'request is successful' do
@@ -42,12 +42,12 @@ class Overrides::OmniauthCallbacksControllerTest < ActionDispatch::IntegrationTe
     end
 
     test 'controller was overridden' do
-      assert_equal @resource.nickname,
+      assert_equal @dta_resource.nickname,
                    Overrides::OmniauthCallbacksController::DEFAULT_NICKNAME
     end
 
     test 'whitelisted param was allowed' do
-      assert_equal @favorite_color, @resource.favorite_color
+      assert_equal @favorite_color, @dta_resource.favorite_color
     end
   end
 end

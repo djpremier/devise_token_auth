@@ -5,17 +5,17 @@ module Overrides
     OVERRIDE_PROOF = '(^^,)'.freeze
 
     def update
-      if @resource
-        if @resource.update(account_update_params)
+      if @dta_resource
+        if @dta_resource.update(account_update_params)
           render json: {
             status: 'success',
-            data:   @resource.as_json,
+            data:   @dta_resource.as_json,
             override_proof: OVERRIDE_PROOF
           }
         else
           render json: {
             status: 'error',
-            errors: @resource.errors
+            errors: @dta_resource.errors
           }, status: 422
         end
       else

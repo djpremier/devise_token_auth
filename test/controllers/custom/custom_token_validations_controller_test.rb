@@ -7,16 +7,16 @@ class Custom::TokenValidationsControllerTest < ActionDispatch::IntegrationTest
     include CustomControllersRoutes
 
     before do
-      @resource = create(:user, :confirmed)
+      @dta_resource = create(:user, :confirmed)
 
-      @auth_headers = @resource.create_new_auth_token
+      @auth_headers = @dta_resource.create_new_auth_token
 
       @token     = @auth_headers['access-token']
       @client_id = @auth_headers['client']
       @expiry    = @auth_headers['expiry']
 
       # ensure that request is not treated as batch request
-      age_token(@resource, @client_id)
+      age_token(@dta_resource, @client_id)
     end
 
     test 'yield resource to block on validate_token success' do

@@ -20,7 +20,7 @@ module DeviseTokenAuth::Concerns::ResourceFinder
   end
 
   def find_resource(field, value)
-    @resource = if database_adapter&.include?('mysql')
+    @dta_resource = if database_adapter&.include?('mysql')
                   # fix for mysql default case insensitivity
                   field_sanitized = resource_class.connection.quote_column_name(field)
                   resource_class.where("BINARY #{field_sanitized} = ? AND provider= ?", value, provider).first
@@ -46,7 +46,7 @@ module DeviseTokenAuth::Concerns::ResourceFinder
     mapping = if m
                 Devise.mappings[m]
               else
-                Devise.mappings[resource_name] || Devise.mappings.values.first
+                Devise.mappings.values.first
               end
 
     mapping.to

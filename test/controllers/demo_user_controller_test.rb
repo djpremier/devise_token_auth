@@ -13,9 +13,9 @@ class DemoUserControllerTest < ActionDispatch::IntegrationTest
   describe DemoUserController do
     describe 'Token access' do
       before do
-        @resource = create(:user, :confirmed)
+        @dta_resource = create(:user, :confirmed)
 
-        @auth_headers = @resource.create_new_auth_token
+        @auth_headers = @dta_resource.create_new_auth_token
 
         @token     = @auth_headers['access-token']
         @client_id = @auth_headers['client']
@@ -25,7 +25,7 @@ class DemoUserControllerTest < ActionDispatch::IntegrationTest
       describe 'successful request' do
         before do
           # ensure that request is not treated as batch request
-          age_token(@resource, @client_id)
+          age_token(@dta_resource, @client_id)
 
           get '/demo/members_only',
               params: {},
@@ -39,7 +39,7 @@ class DemoUserControllerTest < ActionDispatch::IntegrationTest
 
         describe 'devise mappings' do
           it 'should define current_user' do
-            assert_equal @resource, @controller.current_user
+            assert_equal @dta_resource, @controller.current_user
           end
 
           it 'should define user_signed_in?' do
@@ -47,7 +47,7 @@ class DemoUserControllerTest < ActionDispatch::IntegrationTest
           end
 
           it 'should not define current_mang' do
-            refute_equal @resource, @controller.current_mang
+            refute_equal @dta_resource, @controller.current_mang
           end
 
           it 'should define render_authenticate_error' do
@@ -68,7 +68,7 @@ class DemoUserControllerTest < ActionDispatch::IntegrationTest
         end
 
         it "should return the user's uid in the auth header" do
-          assert_equal @resource.uid, @resp_uid
+          assert_equal @dta_resource.uid, @resp_uid
         end
 
         it 'should not treat this request as a batch request' do
@@ -77,9 +77,9 @@ class DemoUserControllerTest < ActionDispatch::IntegrationTest
 
         describe 'subsequent requests' do
           before do
-            @resource.reload
+            @dta_resource.reload
             # ensure that request is not treated as batch request
-            age_token(@resource, @client_id)
+            age_token(@dta_resource, @client_id)
 
             get '/demo/members_only',
                 params: {},
@@ -115,8 +115,8 @@ class DemoUserControllerTest < ActionDispatch::IntegrationTest
       describe 'disable change_headers_on_each_request' do
         before do
           DeviseTokenAuth.change_headers_on_each_request = false
-          @resource.reload
-          age_token(@resource, @client_id)
+          @dta_resource.reload
+          age_token(@dta_resource, @client_id)
 
           get '/demo/members_only',
               params: {},
@@ -127,8 +127,8 @@ class DemoUserControllerTest < ActionDispatch::IntegrationTest
           @first_access_token = response.headers['access-token']
           @first_response_status = response.status
 
-          @resource.reload
-          age_token(@resource, @client_id)
+          @dta_resource.reload
+          age_token(@dta_resource, @client_id)
 
           # use expired auth header
           get '/demo/members_only',
@@ -178,7 +178,7 @@ class DemoUserControllerTest < ActionDispatch::IntegrationTest
       describe 'batch requests' do
         describe 'success' do
           before do
-            age_token(@resource, @client_id)
+            age_token(@dta_resource, @client_id)
             # request.headers.merge!(@auth_headers)
 
             get '/demo/members_only',
@@ -221,8 +221,8 @@ class DemoUserControllerTest < ActionDispatch::IntegrationTest
 
         describe 'unbatch' do
           before do
-            @resource.reload
-            age_token(@resource, @client_id)
+            @dta_resource.reload
+            age_token(@dta_resource, @client_id)
 
             get '/demo/members_only',
                 params: {},
@@ -250,8 +250,8 @@ class DemoUserControllerTest < ActionDispatch::IntegrationTest
 
         describe 'time out' do
           before do
-            @resource.reload
-            age_token(@resource, @client_id)
+            @dta_resource.reload
+            age_token(@dta_resource, @client_id)
 
             get '/demo/members_only',
                 params: {},
@@ -262,8 +262,8 @@ class DemoUserControllerTest < ActionDispatch::IntegrationTest
             @first_access_token = response.headers['access-token']
             @first_response_status = response.status
 
-            @resource.reload
-            age_token(@resource, @client_id)
+            @dta_resource.reload
+            age_token(@dta_resource, @client_id)
 
             # use previous auth header
             get '/demo/members_only',
@@ -275,8 +275,8 @@ class DemoUserControllerTest < ActionDispatch::IntegrationTest
             @second_access_token = response.headers['access-token']
             @second_response_status = response.status
 
-            @resource.reload
-            age_token(@resource, @client_id)
+            @dta_resource.reload
+            age_token(@dta_resource, @client_id)
 
             # use expired auth headers
             get '/demo/members_only_mang',
@@ -345,12 +345,12 @@ class DemoUserControllerTest < ActionDispatch::IntegrationTest
 
           # adding one more token to simulate another logged in device
           @old_auth_headers = @auth_headers
-          @auth_headers = @resource.create_new_auth_token
-          age_token(@resource, @client_id)
-          assert @resource.tokens.count > 1
+          @auth_headers = @dta_resource.create_new_auth_token
+          age_token(@dta_resource, @client_id)
+          assert @dta_resource.tokens.count > 1
 
           # password changed from new device
-          @resource.update(password: 'newsecret123',
+          @dta_resource.update(password: 'newsecret123',
                            password_confirmation: 'newsecret123')
 
           get '/demo/members_only',
@@ -363,7 +363,7 @@ class DemoUserControllerTest < ActionDispatch::IntegrationTest
         end
 
         it 'should have only one token' do
-          assert_equal 1, @resource.tokens.count
+          assert_equal 1, @dta_resource.tokens.count
         end
 
         it 'new request should be successful' do
@@ -384,7 +384,7 @@ class DemoUserControllerTest < ActionDispatch::IntegrationTest
         describe 'when change_headers_on_each_request is set to false' do
           before do
             DeviseTokenAuth.change_headers_on_each_request = false
-            age_token(@resource, @client_id)
+            age_token(@dta_resource, @client_id)
 
             get '/demo/members_only_remove_token',
                 params: {},
@@ -402,7 +402,7 @@ class DemoUserControllerTest < ActionDispatch::IntegrationTest
 
         describe 'when change_headers_on_each_request is set to true' do
           before do
-            age_token(@resource, @client_id)
+            age_token(@dta_resource, @client_id)
             get '/demo/members_only_remove_token',
                 params: {},
                 headers: @auth_headers
@@ -418,9 +418,9 @@ class DemoUserControllerTest < ActionDispatch::IntegrationTest
         before do
           # ensure that request is not treated as batch request
           DeviseTokenAuth.headers_names[:'access-token'] = 'new-access-token'
-          auth_headers_modified = @resource.create_new_auth_token
+          auth_headers_modified = @dta_resource.create_new_auth_token
           client_id = auth_headers_modified['client']
-          age_token(@resource, client_id)
+          age_token(@dta_resource, client_id)
 
           get '/demo/members_only',
               params: {},
@@ -450,11 +450,11 @@ class DemoUserControllerTest < ActionDispatch::IntegrationTest
 
             assert_equal(
               [n, DeviseTokenAuth.max_number_of_devices].min,
-              @resource.reload.tokens.length
+              @dta_resource.reload.tokens.length
             )
 
             # Add a new device (and token) ahead of the next iteration
-            @resource.create_new_auth_token
+            @dta_resource.create_new_auth_token
 
           end
         end
@@ -462,18 +462,18 @@ class DemoUserControllerTest < ActionDispatch::IntegrationTest
         it 'should drop the oldest token when the maximum number of devices is exceeded' do
           # create the maximum number of tokens
           1.upto(DeviseTokenAuth.max_number_of_devices).each do
-            @resource.create_new_auth_token
+            @dta_resource.create_new_auth_token
           end
 
           # get the oldest token client_id
-          oldest_client_id, = @resource.reload.tokens.min_by do |cid, v|
+          oldest_client_id, = @dta_resource.reload.tokens.min_by do |cid, v|
             v[:expiry] || v['expiry']
           end # => [ 'CLIENT_ID', {token: ...} ]
 
           # create another token, thereby dropping the oldest token
-          @resource.create_new_auth_token
+          @dta_resource.create_new_auth_token
 
-          assert_not_includes @resource.reload.tokens.keys, oldest_client_id
+          assert_not_includes @dta_resource.reload.tokens.keys, oldest_client_id
         end
 
         after do
@@ -484,9 +484,9 @@ class DemoUserControllerTest < ActionDispatch::IntegrationTest
 
     describe 'bypass_sign_in' do
       before do
-        @resource = create(:user)
+        @dta_resource = create(:user)
 
-        @auth_headers = @resource.create_new_auth_token
+        @auth_headers = @dta_resource.create_new_auth_token
 
         @token     = @auth_headers['access-token']
         @client_id = @auth_headers['client']
@@ -494,7 +494,7 @@ class DemoUserControllerTest < ActionDispatch::IntegrationTest
       end
       describe 'is default value (true)' do
         before do
-          age_token(@resource, @client_id)
+          age_token(@dta_resource, @client_id)
 
           get '/demo/members_only', params: {}, headers: @auth_headers
 
@@ -511,13 +511,13 @@ class DemoUserControllerTest < ActionDispatch::IntegrationTest
         end
 
         it 'should set current user' do
-          assert_equal @controller.current_user, @resource
+          assert_equal @controller.current_user, @dta_resource
         end
       end
       describe 'is false' do
         before do
           DeviseTokenAuth.bypass_sign_in = false
-          age_token(@resource, @client_id)
+          age_token(@dta_resource, @client_id)
 
           get '/demo/members_only', params: {}, headers: @auth_headers
 
@@ -539,15 +539,15 @@ class DemoUserControllerTest < ActionDispatch::IntegrationTest
 
     describe 'enable_standard_devise_support' do
       before do
-        @resource = create(:user, :confirmed)
-        @auth_headers = @resource.create_new_auth_token
+        @dta_resource = create(:user, :confirmed)
+        @auth_headers = @dta_resource.create_new_auth_token
         DeviseTokenAuth.enable_standard_devise_support = true
       end
 
       describe 'Existing Warden authentication' do
         before do
-          @resource = create(:user, :confirmed)
-          login_as(@resource, scope: :user)
+          @dta_resource = create(:user, :confirmed)
+          login_as(@dta_resource, scope: :user)
 
           # no auth headers sent, testing that warden authenticates correctly.
           get '/demo/members_only',
@@ -562,7 +562,7 @@ class DemoUserControllerTest < ActionDispatch::IntegrationTest
 
         describe 'devise mappings' do
           it 'should define current_user' do
-            assert_equal @resource, @controller.current_user
+            assert_equal @dta_resource, @controller.current_user
           end
 
           it 'should define user_signed_in?' do
@@ -570,7 +570,7 @@ class DemoUserControllerTest < ActionDispatch::IntegrationTest
           end
 
           it 'should not define current_mang' do
-            refute_equal @resource, @controller.current_mang
+            refute_equal @dta_resource, @controller.current_mang
           end
 
         end
@@ -598,8 +598,8 @@ class DemoUserControllerTest < ActionDispatch::IntegrationTest
 
       describe 'existing Warden authentication with ignored token data' do
         before do
-          @resource = create(:user, :confirmed)
-          login_as(@resource, scope: :user)
+          @dta_resource = create(:user, :confirmed)
+          login_as(@dta_resource, scope: :user)
 
           get '/demo/members_only',
               params: {},
@@ -613,7 +613,7 @@ class DemoUserControllerTest < ActionDispatch::IntegrationTest
 
         describe 'devise mappings' do
           it 'should define current_user' do
-            assert_equal @resource, @controller.current_user
+            assert_equal @dta_resource, @controller.current_user
           end
 
           it 'should define user_signed_in?' do
@@ -621,7 +621,7 @@ class DemoUserControllerTest < ActionDispatch::IntegrationTest
           end
 
           it 'should not define current_mang' do
-            refute_equal @resource, @controller.current_mang
+            refute_equal @dta_resource, @controller.current_mang
           end
         end
 

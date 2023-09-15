@@ -24,7 +24,7 @@ class DeviseTokenAuth::SessionsControllerTest < ActionController::TestCase
 
           post :create, params: @user_session_params
 
-          @resource = assigns(:resource)
+          @dta_resource = assigns(:resource)
           @data = JSON.parse(response.body)
         end
 
@@ -218,7 +218,7 @@ class DeviseTokenAuth::SessionsControllerTest < ActionController::TestCase
                params: { email: @existing_user.email,
                          password: 'bogus' }
 
-          @resource = assigns(:resource)
+          @dta_resource = assigns(:resource)
           @data = JSON.parse(response.body)
         end
 
@@ -245,7 +245,7 @@ class DeviseTokenAuth::SessionsControllerTest < ActionController::TestCase
                params: { email: @existing_user.email,
                          password: 'bogus' }
 
-          @resource = assigns(:resource)
+          @dta_resource = assigns(:resource)
           @data = JSON.parse(response.body)
         end
 
@@ -265,7 +265,7 @@ class DeviseTokenAuth::SessionsControllerTest < ActionController::TestCase
 
       describe 'case-insensitive email' do
         before do
-          @resource_class = User
+          @dta_resource_class = User
           @request_params = {
             email: @existing_user.email.upcase,
             password: @existing_user.password
@@ -273,13 +273,13 @@ class DeviseTokenAuth::SessionsControllerTest < ActionController::TestCase
         end
 
         test 'request should succeed if configured' do
-          @resource_class.case_insensitive_keys = [:email]
+          @dta_resource_class.case_insensitive_keys = [:email]
           post :create, params: @request_params
           assert_equal 200, response.status
         end
 
         test 'request should fail if not configured' do
-          @resource_class.case_insensitive_keys = []
+          @dta_resource_class.case_insensitive_keys = []
           post :create, params: @request_params
           assert_equal 401, response.status
         end
@@ -287,7 +287,7 @@ class DeviseTokenAuth::SessionsControllerTest < ActionController::TestCase
 
       describe 'stripping whitespace on email' do
         before do
-          @resource_class = User
+          @dta_resource_class = User
           @request_params = {
             # adding whitespace before and after email
             email: " #{@existing_user.email}  ",
@@ -296,13 +296,13 @@ class DeviseTokenAuth::SessionsControllerTest < ActionController::TestCase
         end
 
         test 'request should succeed if configured' do
-          @resource_class.strip_whitespace_keys = [:email]
+          @dta_resource_class.strip_whitespace_keys = [:email]
           post :create, params: @request_params
           assert_equal 200, response.status
         end
 
         test 'request should fail if not configured' do
-          @resource_class.strip_whitespace_keys = []
+          @dta_resource_class.strip_whitespace_keys = []
           post :create, params: @request_params
           assert_equal 401, response.status
         end
@@ -315,7 +315,7 @@ class DeviseTokenAuth::SessionsControllerTest < ActionController::TestCase
           @unconfirmed_user = create(:user)
           post :create, params: { email: @unconfirmed_user.email,
                                   password: @unconfirmed_user.password }
-          @resource = assigns(:resource)
+          @dta_resource = assigns(:resource)
           @data = JSON.parse(response.body)
         end
 
@@ -330,7 +330,7 @@ class DeviseTokenAuth::SessionsControllerTest < ActionController::TestCase
                               email: @unconfirmed_user.email)]
         end
       end
-      
+
       describe 'With paranoid mode' do
         before do
           @unconfirmed_user = create(:user)
@@ -338,7 +338,7 @@ class DeviseTokenAuth::SessionsControllerTest < ActionController::TestCase
             post :create, params: { email: @unconfirmed_user.email,
                                     password: @unconfirmed_user.password }
           end
-          @resource = assigns(:resource)
+          @dta_resource = assigns(:resource)
           @data = JSON.parse(response.body)
         end
 
@@ -362,7 +362,7 @@ class DeviseTokenAuth::SessionsControllerTest < ActionController::TestCase
         post :create,
              params: { email: @recent_unconfirmed_user.email,
                        password: @recent_unconfirmed_user.password }
-        @resource = assigns(:resource)
+        @dta_resource = assigns(:resource)
         @data = JSON.parse(response.body)
       end
 
@@ -385,7 +385,7 @@ class DeviseTokenAuth::SessionsControllerTest < ActionController::TestCase
         post :create,
              params: { email: @unconfirmed_user.email,
                        password: @unconfirmed_user.password }
-        @resource = assigns(:resource)
+        @dta_resource = assigns(:resource)
         @data = JSON.parse(response.body)
       end
 
@@ -404,7 +404,7 @@ class DeviseTokenAuth::SessionsControllerTest < ActionController::TestCase
           post :create,
               params: { email: -> { Faker::Internet.email },
                         password: -> { Faker::Number.number(10) } }
-          @resource = assigns(:resource)
+          @dta_resource = assigns(:resource)
           @data = JSON.parse(response.body)
         end
 
@@ -431,7 +431,7 @@ class DeviseTokenAuth::SessionsControllerTest < ActionController::TestCase
             end
           end
         end
-        
+
         test 'password should be hashed' do
           @bcrypt_mock.verify
         end
@@ -454,7 +454,7 @@ class DeviseTokenAuth::SessionsControllerTest < ActionController::TestCase
              params: { email: @existing_user.email,
                        password: @existing_user.password }
 
-        @resource = assigns(:resource)
+        @dta_resource = assigns(:resource)
         @data = JSON.parse(response.body)
       end
 
@@ -483,7 +483,7 @@ class DeviseTokenAuth::SessionsControllerTest < ActionController::TestCase
              params: { email: @existing_user.email,
                        password: @existing_user.password }
 
-        @resource = assigns(:resource)
+        @dta_resource = assigns(:resource)
         @data = JSON.parse(response.body)
       end
 

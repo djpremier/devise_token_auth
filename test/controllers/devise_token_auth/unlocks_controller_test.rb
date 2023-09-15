@@ -35,12 +35,12 @@ class DeviseTokenAuth::UnlocksControllerTest < ActionController::TestCase
 
     describe 'Unlocking user' do
       before do
-        @resource = create(:lockable_user)
+        @dta_resource = create(:lockable_user)
       end
 
       describe 'request unlock without email' do
         before do
-          @auth_headers = @resource.create_new_auth_token
+          @auth_headers = @dta_resource.create_new_auth_token
           @new_password = Faker::Internet.password
 
           post :create
@@ -95,7 +95,7 @@ class DeviseTokenAuth::UnlocksControllerTest < ActionController::TestCase
 
         describe 'successfully requested unlock without paranoid mode' do
           before do
-            post :create, params: { email: @resource.email }
+            post :create, params: { email: @dta_resource.email }
 
             @data = JSON.parse(response.body)
           end
@@ -108,7 +108,7 @@ class DeviseTokenAuth::UnlocksControllerTest < ActionController::TestCase
         describe 'successfully requested unlock with paranoid mode' do
           before do
             swap Devise, paranoid: true do
-              post :create, params: { email: @resource.email }
+              post :create, params: { email: @dta_resource.email }
               @data = JSON.parse(response.body)
             end
           end
@@ -127,10 +127,10 @@ class DeviseTokenAuth::UnlocksControllerTest < ActionController::TestCase
 
         describe 'case-sensitive email' do
           before do
-            post :create, params: { email: @resource.email }
+            post :create, params: { email: @dta_resource.email }
 
             @mail = ActionMailer::Base.deliveries.last
-            @resource.reload
+            @dta_resource.reload
             @data = JSON.parse(response.body)
 
             @mail_config_name  = CGI.unescape(@mail.body.match(/config=([^&]*)&/)[1])
@@ -142,7 +142,7 @@ class DeviseTokenAuth::UnlocksControllerTest < ActionController::TestCase
           end
 
           test 'response should contains message' do
-            assert_equal @data['message'], I18n.t('devise_token_auth.unlocks.sended', email: @resource.email)
+            assert_equal @data['message'], I18n.t('devise_token_auth.unlocks.sended', email: @dta_resource.email)
           end
 
           test 'action should send an email' do
@@ -150,7 +150,7 @@ class DeviseTokenAuth::UnlocksControllerTest < ActionController::TestCase
           end
 
           test 'the email should be addressed to the user' do
-            assert_equal @mail.to.first, @resource.email
+            assert_equal @mail.to.first, @dta_resource.email
           end
 
           test 'the client config name should fall back to "default"' do
@@ -159,7 +159,7 @@ class DeviseTokenAuth::UnlocksControllerTest < ActionController::TestCase
 
           test 'the email body should contain a link with reset token as a query param' do
             user = LockableUser.unlock_access_by_token(@mail_reset_token)
-            assert_equal user.id, @resource.id
+            assert_equal user.id, @dta_resource.id
           end
 
           describe 'unlock link failure' do
@@ -174,7 +174,7 @@ class DeviseTokenAuth::UnlocksControllerTest < ActionController::TestCase
             before do
               get :show, params: { unlock_token: @mail_reset_token }
 
-              @resource.reload
+              @dta_resource.reload
 
               raw_qs = response.location.split('?')[1]
               @qs = Rack::Utils.parse_nested_query(raw_qs)
@@ -203,28 +203,28 @@ class DeviseTokenAuth::UnlocksControllerTest < ActionController::TestCase
             end
 
             test 'response auth params should be valid' do
-              assert @resource.valid_token?(@token, @client_id)
-              assert @resource.valid_token?(@access_token, @client)
+              assert @dta_resource.valid_token?(@token, @client_id)
+              assert @dta_resource.valid_token?(@access_token, @client)
             end
           end
         end
 
         describe 'case-insensitive email' do
           before do
-            @resource_class = LockableUser
+            @dta_resource_class = LockableUser
             @request_params = {
-              email:        @resource.email.upcase
+              email:        @dta_resource.email.upcase
             }
           end
 
           test 'response should return success status if configured' do
-            @resource_class.case_insensitive_keys = [:email]
+            @dta_resource_class.case_insensitive_keys = [:email]
             post :create, params: @request_params
             assert_equal 200, response.status
           end
 
           test 'response should return failure status if not configured' do
-            @resource_class.case_insensitive_keys = []
+            @dta_resource_class.case_insensitive_keys = []
             post :create, params: @request_params
             assert_equal 404, response.status
           end

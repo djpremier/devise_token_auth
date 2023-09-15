@@ -6,9 +6,9 @@ module DeviseTokenAuth
     before_action :set_user_by_token, only: [:validate_token]
 
     def validate_token
-      # @resource will have been set by set_user_by_token concern
-      if @resource
-        yield @resource if block_given?
+      # @dta_resource will have been set by set_user_by_token concern
+      if @dta_resource
+        yield @dta_resource if block_given?
         render_validate_token_success
       else
         render_validate_token_error
@@ -20,7 +20,7 @@ module DeviseTokenAuth
     def render_validate_token_success
       render json: {
         success: true,
-        data: resource_data(resource_json: @resource.token_validation_response)
+        data: resource_data(resource_json: @dta_resource.token_validation_response)
       }
     end
 
