@@ -11,7 +11,7 @@ module DeviseTokenAuth
     end
 
     def create
-      if field = (resource_params.keys.map(&:to_sym) & resource_class.authentication_keys).first
+      if field = (resource_params.keys.map(&:to_sym) & dta_resource_class.authentication_keys).first
         q_value = get_case_insensitive_field_from_resource_params(field)
 
         @dta_resource = find_resource(field, q_value)
@@ -76,7 +76,7 @@ module DeviseTokenAuth
       auth_key = nil
       auth_val = nil
       # iterate thru allowed auth keys, use first found
-      resource_class.authentication_keys.each do |k|
+      dta_resource_class.authentication_keys.each do |k|
         if resource_params[k]
           auth_val = resource_params[k]
           auth_key = k
@@ -85,7 +85,7 @@ module DeviseTokenAuth
       end
 
       # honor devise configuration for case_insensitive_keys
-      if resource_class.case_insensitive_keys.include?(auth_key)
+      if dta_resource_class.case_insensitive_keys.include?(auth_key)
         auth_val.downcase!
       end
 
@@ -147,7 +147,7 @@ module DeviseTokenAuth
       # calculated even if no resource has been found. Devise's DatabaseAuthenticatable warden
       # strategy handles this case similarly:
       # https://github.com/heartcombo/devise/blob/main/lib/devise/strategies/database_authenticatable.rb
-      resource_class.new.password = resource_params[:password] if Devise.paranoid
+      dta_resource_class.new.password = resource_params[:password] if Devise.paranoid
     end
   end
 end

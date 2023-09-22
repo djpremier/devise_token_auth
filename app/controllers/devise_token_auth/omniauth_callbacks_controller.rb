@@ -131,7 +131,7 @@ module DeviseTokenAuth
       end
     end
 
-    def resource_class(mapping = nil)
+    def dta_resource_class(mapping = nil)
       return @dta_resource_class if defined?(@dta_resource_class)
 
       constant_name = omniauth_params['resource_class'].presence || params['resource_class'].presence
@@ -141,8 +141,8 @@ module DeviseTokenAuth
       @dta_resource_class
     end
 
-    def resource_name
-      resource_class
+    def dta_resource_name
+      dta_resource_class
     end
 
     def unsafe_auth_origin_url
@@ -260,7 +260,7 @@ module DeviseTokenAuth
 
     def get_resource_from_auth_hash
       # find or create user by provider and provider uid
-      @dta_resource = resource_class.where(
+      @dta_resource = dta_resource_class.where(
         uid: auth_hash['uid'],
         provider: auth_hash['provider']
       ).first_or_initialize

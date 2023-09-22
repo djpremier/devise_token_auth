@@ -34,7 +34,7 @@ module DeviseTokenAuth
     # this is where users arrive after visiting the password reset confirmation link
     def edit
       # if a user is not found, return nil
-      @dta_resource = resource_class.with_reset_password_token(resource_params[:reset_password_token])
+      @dta_resource = dta_resource_class.with_reset_password_token(resource_params[:reset_password_token])
 
       if @dta_resource && @dta_resource.reset_password_period_valid?
         token = @dta_resource.create_token unless require_client_password_reset_token?
@@ -72,7 +72,7 @@ module DeviseTokenAuth
     def update
       # make sure user is authorized
       if require_client_password_reset_token? && resource_params[:reset_password_token]
-        @dta_resource = resource_class.with_reset_password_token(resource_params[:reset_password_token])
+        @dta_resource = dta_resource_class.with_reset_password_token(resource_params[:reset_password_token])
         return render_update_error_unauthorized unless @dta_resource
 
         @token = @dta_resource.create_token

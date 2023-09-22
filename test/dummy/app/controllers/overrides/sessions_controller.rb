@@ -5,7 +5,7 @@ module Overrides
     OVERRIDE_PROOF = '(^^,)'.freeze
 
     def create
-      @dta_resource = resource_class.dta_find_by(email: resource_params[:email])
+      @dta_resource = dta_resource_class.dta_find_by(email: resource_params[:email])
 
       if @dta_resource && valid_params?(:email, resource_params[:email]) && @dta_resource.valid_password?(resource_params[:password]) && @dta_resource.confirmed?
         @token = @dta_resource.create_token

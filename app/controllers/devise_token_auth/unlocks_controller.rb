@@ -32,7 +32,7 @@ module DeviseTokenAuth
     end
 
     def show
-      @dta_resource = resource_class.unlock_access_by_token(params[:unlock_token])
+      @dta_resource = dta_resource_class.unlock_access_by_token(params[:unlock_token])
 
       if @dta_resource.persisted?
         token = @dta_resource.create_token

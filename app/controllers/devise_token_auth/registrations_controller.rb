@@ -31,9 +31,9 @@ module DeviseTokenAuth
       return render_create_error_redirect_url_not_allowed if blacklisted_redirect_url?(@redirect_url)
 
       # override email confirmation, must be sent manually from ctrl
-      callback_name = defined?(ActiveRecord) && resource_class < ActiveRecord::Base ? :commit : :create
-      resource_class.set_callback(callback_name, :after, :send_on_create_confirmation_instructions)
-      resource_class.skip_callback(callback_name, :after, :send_on_create_confirmation_instructions)
+      callback_name = defined?(ActiveRecord) && dta_resource_class < ActiveRecord::Base ? :commit : :create
+      dta_resource_class.set_callback(callback_name, :after, :send_on_create_confirmation_instructions)
+      dta_resource_class.skip_callback(callback_name, :after, :send_on_create_confirmation_instructions)
 
       if @dta_resource.respond_to? :skip_confirmation_notification!
         # Fix duplicate e-mails by disabling Devise confirmation e-mail
@@ -99,11 +99,11 @@ module DeviseTokenAuth
     protected
 
     def build_resource
-      @dta_resource            = resource_class.new(sign_up_params)
+      @dta_resource            = dta_resource_class.new(sign_up_params)
       @dta_resource.provider   = provider
 
       # honor devise configuration for case_insensitive_keys
-      if resource_class.case_insensitive_keys.include?(:email)
+      if dta_resource_class.case_insensitive_keys.include?(:email)
         @dta_resource.email = sign_up_params[:email].try(:downcase)
       else
         @dta_resource.email = sign_up_params[:email]

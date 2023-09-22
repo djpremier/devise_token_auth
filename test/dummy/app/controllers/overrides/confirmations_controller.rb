@@ -3,7 +3,7 @@
 module Overrides
   class ConfirmationsController < DeviseTokenAuth::ConfirmationsController
     def show
-      @dta_resource = resource_class.confirm_by_token(params[:confirmation_token])
+      @dta_resource = dta_resource_class.confirm_by_token(params[:confirmation_token])
 
       if @dta_resource && @dta_resource.id
         token = @dta_resource.create_token

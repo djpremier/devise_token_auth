@@ -4,14 +4,14 @@ module DeviseTokenAuth
   class ConfirmationsController < DeviseTokenAuth::ApplicationController
 
     def show
-      @dta_resource = resource_class.confirm_by_token(resource_params[:confirmation_token])
+      @dta_resource = dta_resource_class.confirm_by_token(resource_params[:confirmation_token])
 
       if @dta_resource.errors.empty?
         yield @dta_resource if block_given?
 
         redirect_header_options = { account_confirmation_success: true }
 
-        if signed_in?(resource_name)
+        if signed_in?(dta_resource_name)
           token = signed_in_resource.create_token
           signed_in_resource.save!
 
@@ -39,7 +39,7 @@ module DeviseTokenAuth
 
       @email = get_case_insensitive_field_from_resource_params(:email)
 
-      @dta_resource = resource_class.dta_find_by(uid: @email, provider: provider)
+      @dta_resource = dta_resource_class.dta_find_by(uid: @email, provider: provider)
 
       return render_not_found_error unless @dta_resource
 

@@ -8,11 +8,11 @@ module DeviseTokenAuth::Concerns::ResourceFinder
     # honor Devise configuration for case_insensitive keys
     q_value = resource_params[field.to_sym]
 
-    if resource_class.case_insensitive_keys.include?(field.to_sym)
+    if dta_resource_class.case_insensitive_keys.include?(field.to_sym)
       q_value.downcase!
     end
 
-    if resource_class.strip_whitespace_keys.include?(field.to_sym)
+    if dta_resource_class.strip_whitespace_keys.include?(field.to_sym)
       q_value.strip!
     end
 
@@ -22,10 +22,10 @@ module DeviseTokenAuth::Concerns::ResourceFinder
   def find_resource(field, value)
     @dta_resource = if database_adapter&.include?('mysql')
                   # fix for mysql default case insensitivity
-                  field_sanitized = resource_class.connection.quote_column_name(field)
-                  resource_class.where("BINARY #{field_sanitized} = ? AND provider= ?", value, provider).first
+                  field_sanitized = dta_resource_class.connection.quote_column_name(field)
+                  dta_resource_class.where("BINARY #{field_sanitized} = ? AND provider= ?", value, provider).first
                 else
-                  resource_class.dta_find_by(field => value, 'provider' => provider)
+                  dta_resource_class.dta_find_by(field => value, 'provider' => provider)
                 end
   end
 
@@ -35,14 +35,14 @@ module DeviseTokenAuth::Concerns::ResourceFinder
 
       adapter =
         if rails_version >= "6.1"
-          resource_class.try(:connection_db_config)&.try(:adapter)
+          dta_resource_class.try(:connection_db_config)&.try(:adapter)
         else
-          resource_class.try(:connection_config)&.try(:[], :adapter)
+          dta_resource_class.try(:connection_config)&.try(:[], :adapter)
         end
     end
   end
 
-  def resource_class(m = nil)
+  def dta_resource_class(m = nil)
     mapping = if m
                 Devise.mappings[m]
               else
